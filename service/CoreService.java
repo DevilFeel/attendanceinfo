@@ -109,7 +109,7 @@ public class CoreService {
 					}
 					
 					if(!flag){
-						respContent = "您输入的学号不存在，请重新输入";
+						respContent = "请输入正确的学号！";
 					}
 					
 					
