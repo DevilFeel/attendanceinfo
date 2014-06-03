@@ -27,9 +27,9 @@ public class CoreService {
 	public String getCustomizeMenu(){
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("感谢您的关注！").append("\n\n");
-		buffer.append("想关注你或者你孩子在学校的学习嘛\n");
-		buffer.append("那就请回复“AA” + “关注的学生的学号”。\n 如：AA1121302114").append("\n\n");
-		buffer.append("如果已经关注成功，回复“100”可查看其所在班级\n");
+		buffer.append("想关注你或者你孩子在学校的学习嘛").append("\n");
+		buffer.append("那就请回复“AA” + “关注的学生的学号”。 如：AA1121302114").append("\n\n");
+		buffer.append("如果已经关注成功，回复“100”可查看其所在班级").append("\n");
 		return buffer.toString();
 	}
 	
@@ -132,6 +132,35 @@ public class CoreService {
 					
 					textMessage.setContent(respContent);
 					respMessage = MessageUtil.textMessageToXml(textMessage);
+				}else if(reqContent.startsWith("姓名")){
+					String reqStudentName = reqContent.substring(2);						
+					Class.forName("com.mysql.jdbc.Driver").newInstance();
+					Connection conn = null;
+					conn =  DriverManager.getConnection(dbUrl, dbUser, dbPwd);
+					reqStudentName = TransactSQLInjection(reqStudentName);
+					
+					String sql = "select * from student_try where studentname = '"+ reqStudentName +"'";
+					Statement stmt;
+					stmt = conn.createStatement();
+					ResultSet result = stmt.executeQuery(sql);
+					respContent = null;
+					boolean flag = false;
+					while(result.next()){
+						String tmpStr = null;
+						flag = true;
+						tmpStr ="您输入的学号对应的学号为：" 
+						+ result.getString("studentid")
+						+"\n 班级为：" + result.getString("classname") + "\n\n";
+						respContent += tmpStr;
+					}
+					
+					if(!flag){
+						respContent = "您输入的姓名不存在";
+					}
+					
+					
+					textMessage.setContent(respContent);
+					respMessage = MessageUtil.textMessageToXml(textMessage);
 				}
 				else{
 					CoreService StrTemp = new CoreService();
@@ -155,12 +184,6 @@ public class CoreService {
 			respMessage = MessageUtil.textMessageToXml(textMessage);
 		} catch (Exception e){
 			e.printStackTrace();
-			/*
-			TextMessage textMessage = new TextMessage();
-			CoreService StrTemp = new CoreService();
-			String respContent = StrTemp.getFirstCustomize();
-			textMessage.setContent(respContent);
-			respMessage = MessageUtil.textMessageToXml(textMessage);*/
 		}
 
 		return respMessage;
